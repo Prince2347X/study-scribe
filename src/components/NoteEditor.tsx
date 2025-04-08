@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,12 +10,15 @@ import { BookText, FilePlus, Save, Trash2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { generateSummary } from '../services/gemini';
 import { Skeleton } from '@/components/ui/skeleton';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 type Note = {
   id: string;
   title: string;
   content: string;
   subject: string;
+  summary?: string;
   createdAt: Date;
 };
 
@@ -68,11 +70,11 @@ const NoteEditor = () => {
       // Update existing note
       const updatedNotes = notes.map(note => 
         note.id === activeNote.id 
-          ? { ...note, title: noteTitle, content: noteContent, subject: noteSubject }
+          ? { ...note, title: noteTitle, content: noteContent, subject: noteSubject, summary } // Save summary
           : note
       );
       setNotes(updatedNotes);
-      setActiveNote({ ...activeNote, title: noteTitle, content: noteContent, subject: noteSubject });
+      setActiveNote({ ...activeNote, title: noteTitle, content: noteContent, subject: noteSubject, summary }); // Save summary
       toast.success("Note updated successfully");
     } else {
       // Create new note
@@ -81,6 +83,7 @@ const NoteEditor = () => {
         title: noteTitle,
         content: noteContent,
         subject: noteSubject,
+        summary, // Save summary
         createdAt: new Date(),
       };
       setNotes([...notes, newNote]);
@@ -247,13 +250,13 @@ const NoteEditor = () => {
                     <Skeleton className="h-4 w-2/3" />
                   </div>
                 ) : summary ? (
-                  <ScrollArea className="h-[350px]">
+                    <ScrollArea className="h-[350px]">
                     <div className="prose prose-sm max-w-none">
-                      {summary.split('\n').map((paragraph, i) => (
-                        paragraph ? <p key={i}>{paragraph}</p> : <br key={i} />
-                      ))}
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {summary}
+                      </ReactMarkdown>
                     </div>
-                  </ScrollArea>
+                    </ScrollArea>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
                     <BookText className="h-12 w-12 mb-2 opacity-30" />

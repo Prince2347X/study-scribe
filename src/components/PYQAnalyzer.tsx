@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,8 @@ import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { analyzePYQs } from '../services/gemini';
 import { Skeleton } from '@/components/ui/skeleton';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const SUBJECTS = [
   "Mathematics", 
@@ -104,9 +105,7 @@ const PYQAnalyzer = () => {
                 </div>
               ) : analysis ? (
                 <div className="prose prose-sm max-w-none">
-                  {analysis.split('\n').map((paragraph, i) => (
-                    paragraph ? <p key={i}>{paragraph}</p> : <br key={i} />
-                  ))}
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis}</ReactMarkdown>
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
