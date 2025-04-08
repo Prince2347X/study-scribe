@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,13 +20,26 @@ type Task = {
 const TaskManager = () => {
   const [tasks, setTasks] = useState<Task[]>(() => {
     const savedTasks = localStorage.getItem("study-tasks");
-    return savedTasks ? JSON.parse(savedTasks) : [];
+    if (savedTasks) {
+      // Parse tasks and convert date strings back to Date objects
+      const parsedTasks = JSON.parse(savedTasks);
+      return parsedTasks.map((task: any) => ({
+        ...task,
+        dueDate: task.dueDate ? new Date(task.dueDate) : undefined
+      }));
+    }
+    return [];
   });
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
-    localStorage.setItem("study-tasks", JSON.stringify(tasks));
+    // Convert Date objects to ISO strings for storage
+    const tasksToStore = tasks.map(task => ({
+      ...task,
+      dueDate: task.dueDate ? task.dueDate.toISOString() : undefined
+    }));
+    localStorage.setItem("study-tasks", JSON.stringify(tasksToStore));
   }, [tasks]);
 
   const addTask = () => {

@@ -38,7 +38,15 @@ const SUBJECTS = [
 const NoteEditor = () => {
   const [notes, setNotes] = useState<Note[]>(() => {
     const savedNotes = localStorage.getItem("study-notes");
-    return savedNotes ? JSON.parse(savedNotes) : [];
+    if (savedNotes) {
+      // Parse notes and convert date strings back to Date objects
+      const parsedNotes = JSON.parse(savedNotes);
+      return parsedNotes.map((note: any) => ({
+        ...note,
+        createdAt: new Date(note.createdAt)
+      }));
+    }
+    return [];
   });
   
   const [activeNote, setActiveNote] = useState<Note | null>(null);
@@ -49,7 +57,12 @@ const NoteEditor = () => {
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem("study-notes", JSON.stringify(notes));
+    // Convert Date objects to ISO strings for storage
+    const notesToStore = notes.map(note => ({
+      ...note,
+      createdAt: note.createdAt.toISOString()
+    }));
+    localStorage.setItem("study-notes", JSON.stringify(notesToStore));
   }, [notes]);
 
   const createNewNote = () => {
@@ -105,7 +118,7 @@ const NoteEditor = () => {
     setNoteTitle(note.title);
     setNoteContent(note.content);
     setNoteSubject(note.subject);
-    setSummary("");
+    setSummary(note.summary || ""); // Load the saved summary if it exists
   };
 
   const handleGenerateSummary = async () => {
@@ -121,7 +134,30 @@ const NoteEditor = () => {
       const result = await generateSummary(noteContent);
       if (result) {
         setSummary(result);
-        toast.success("Summary generated successfully");
+        // Automatically save the note with the new summary
+        if (activeNote) {
+          // Update existing note
+          const updatedNotes = notes.map(note => 
+            note.id === activeNote.id 
+              ? { ...note, title: noteTitle, content: noteContent, subject: noteSubject, summary: result }
+              : note
+          );
+          setNotes(updatedNotes);
+          setActiveNote({ ...activeNote, title: noteTitle, content: noteContent, subject: noteSubject, summary: result });
+        } else {
+          // Create new note
+          const newNote: Note = {
+            id: crypto.randomUUID(),
+            title: noteTitle,
+            content: noteContent,
+            subject: noteSubject,
+            summary: result,
+            createdAt: new Date(),
+          };
+          setNotes([...notes, newNote]);
+          setActiveNote(newNote);
+        }
+        toast.success("Summary generated and saved successfully");
       }
     } catch (error) {
       toast.error("Failed to generate summary");
