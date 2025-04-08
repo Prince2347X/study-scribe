@@ -1,8 +1,8 @@
-
 import { toast } from 'sonner';
 
-const GEMINI_API_KEY = "AIzaSyDI0usLDxIX3CpP1Kutqh0uiGCqL_Td4oU";
-const MODEL = "gemini-pro-experimental";
+// Replace the hardcoded API key with an environment variable
+const GEMINI_API_KEY = process.env.REACT_APP_GEMINI_API_KEY || "";
+const MODEL = "gemini-2.0-flash-thinking-exp-01-21";
 const API_URL = "https://generativelanguage.googleapis.com/v1beta";
 
 export type GeminiMessage = {
