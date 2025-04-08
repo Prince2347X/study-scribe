@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BookOpen, CheckSquare, MessageCircle, FileQuestion } from 'lucide-react';
@@ -6,12 +5,16 @@ import TaskManager from './TaskManager';
 import NoteEditor from './NoteEditor';
 import PYQAnalyzer from './PYQAnalyzer';
 import DoubtResolver from './DoubtResolver';
+import pkg from '../../package.json';
 
 const Dashboard = () => {
   return (
     <div className="container mx-auto py-6 px-4">
       <header className="mb-8 text-center">
-        <h1 className="text-4xl font-bold mb-2 gradient-text">StudyScribe</h1>
+        <div className="flex items-center justify-center gap-2">
+          <h1 className="text-4xl font-bold mb-2 gradient-text">StudyScribe</h1>
+          <span className="text-sm text-muted-foreground">v{pkg.version}</span>
+        </div>
         <p className="text-muted-foreground">Your AI-powered study companion</p>
       </header>
 
