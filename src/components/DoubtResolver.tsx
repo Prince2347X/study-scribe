@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,8 @@ import { resolveDoubt, GeminiMessage } from '../services/gemini';
 import { SendHorizontal, Bot, User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const DoubtResolver = () => {
   const [messages, setMessages] = useState<{ role: "user" | "model"; content: string }[]>([
@@ -108,9 +109,9 @@ const DoubtResolver = () => {
                       }`}
                     >
                       <div className="whitespace-pre-wrap text-sm">
-                        {msg.content.split('\n').map((paragraph, i) => (
-                          paragraph ? <p key={i}>{paragraph}</p> : <br key={i} />
-                        ))}
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {msg.content}
+                        </ReactMarkdown>
                       </div>
                     </div>
                   </div>
