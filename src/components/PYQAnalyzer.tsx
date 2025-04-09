@@ -1,27 +1,40 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { analyzePYQs } from '../services/gemini';
-import { Skeleton } from '@/components/ui/skeleton';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import { analyzePYQs } from "../services/gemini";
+import { Skeleton } from "@/components/ui/skeleton";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const SUBJECTS = [
-  "Mathematics", 
-  "Physics", 
-  "Chemistry", 
-  "Biology", 
+  "Mathematics",
+  "Physics",
+  "Chemistry",
+  "Biology",
   "Computer Science",
   "History",
   "Geography",
   "Literature",
   "Economics",
-  "Other"
+  "Other",
 ];
 
 const PYQAnalyzer = () => {
@@ -35,10 +48,10 @@ const PYQAnalyzer = () => {
       toast.error("Please add more questions to analyze");
       return;
     }
-    
+
     setIsAnalyzing(true);
     setAnalysis("");
-    
+
     try {
       const result = await analyzePYQs(questions, subject);
       if (result) {
@@ -61,7 +74,9 @@ const PYQAnalyzer = () => {
             PYQ Analyzer
           </span>
         </CardTitle>
-        <CardDescription>Analyze previous year questions with AI assistance</CardDescription>
+        <CardDescription>
+          Analyze previous year questions with AI assistance
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -71,8 +86,10 @@ const PYQAnalyzer = () => {
                 <SelectValue placeholder="Select subject" />
               </SelectTrigger>
               <SelectContent>
-                {SUBJECTS.map(sub => (
-                  <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                {SUBJECTS.map((sub) => (
+                  <SelectItem key={sub} value={sub}>
+                    {sub}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -82,8 +99,8 @@ const PYQAnalyzer = () => {
               onChange={(e) => setQuestions(e.target.value)}
               className="min-h-[150px]"
             />
-            <Button 
-              onClick={handleAnalyze} 
+            <Button
+              onClick={handleAnalyze}
               className="gradient-bg-teal w-full"
               disabled={isAnalyzing || questions.trim().length < 20}
             >
@@ -105,11 +122,15 @@ const PYQAnalyzer = () => {
                 </div>
               ) : analysis ? (
                 <div className="prose prose-sm max-w-none">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {analysis}
+                  </ReactMarkdown>
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
-                  <p>No analysis yet. Paste some questions and click "Analyze"</p>
+                  <p>
+                    No analysis yet. Paste some questions and click "Analyze"
+                  </p>
                 </div>
               )}
             </ScrollArea>

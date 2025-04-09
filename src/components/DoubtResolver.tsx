@@ -1,21 +1,54 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useRef, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { format } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
-import { resolveDoubt, GeminiMessage, generateSummary } from '../services/gemini';
-import { SendHorizontal, Bot, User, Calendar as CalendarIcon, BookmarkPlus, PenSquare } from "lucide-react";
+import {
+  resolveDoubt,
+  GeminiMessage,
+  generateSummary,
+} from "../services/gemini";
+import {
+  SendHorizontal,
+  Bot,
+  User,
+  Calendar as CalendarIcon,
+  BookmarkPlus,
+  PenSquare,
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 // Task type from TaskManager
 type Task = {
@@ -36,22 +69,28 @@ type Note = {
 };
 
 const SUBJECTS = [
-  "Mathematics", 
-  "Physics", 
-  "Chemistry", 
-  "Biology", 
+  "Mathematics",
+  "Physics",
+  "Chemistry",
+  "Biology",
   "Computer Science",
   "History",
   "Geography",
   "Literature",
   "Economics",
-  "Other"
+  "Other",
 ];
 
 const DoubtResolver = () => {
   // Existing states
-  const [messages, setMessages] = useState<{ role: "user" | "model"; content: string }[]>([
-    { role: "model", content: "Hi! I'm your AI study assistant. How can I help you with your studies today?" }
+  const [messages, setMessages] = useState<
+    { role: "user" | "model"; content: string }[]
+  >([
+    {
+      role: "model",
+      content:
+        "Hi! I'm your AI study assistant. How can I help you with your studies today?",
+    },
   ]);
   const [input, setInput] = useState("");
   const [subject, setSubject] = useState("General");
@@ -76,7 +115,7 @@ const DoubtResolver = () => {
       const parsedTasks = JSON.parse(savedTasks);
       return parsedTasks.map((task: any) => ({
         ...task,
-        dueDate: task.dueDate ? new Date(task.dueDate) : undefined
+        dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
       }));
     }
     return [];
@@ -88,7 +127,7 @@ const DoubtResolver = () => {
       const parsedNotes = JSON.parse(savedNotes);
       return parsedNotes.map((note: any) => ({
         ...note,
-        createdAt: new Date(note.createdAt)
+        createdAt: new Date(note.createdAt),
       }));
     }
     return [];
@@ -96,17 +135,17 @@ const DoubtResolver = () => {
 
   // Save tasks and notes to localStorage when they change
   useEffect(() => {
-    const tasksToStore = tasks.map(task => ({
+    const tasksToStore = tasks.map((task) => ({
       ...task,
-      dueDate: task.dueDate ? task.dueDate.toISOString() : undefined
+      dueDate: task.dueDate ? task.dueDate.toISOString() : undefined,
     }));
     localStorage.setItem("study-tasks", JSON.stringify(tasksToStore));
   }, [tasks]);
 
   useEffect(() => {
-    const notesToStore = notes.map(note => ({
+    const notesToStore = notes.map((note) => ({
       ...note,
-      createdAt: note.createdAt.toISOString()
+      createdAt: note.createdAt.toISOString(),
     }));
     localStorage.setItem("study-notes", JSON.stringify(notesToStore));
   }, [notes]);
@@ -123,18 +162,18 @@ const DoubtResolver = () => {
     };
 
     const handleClickOutside = (event: MouseEvent) => {
-      const contextMenu = document.querySelector('.context-menu');
+      const contextMenu = document.querySelector(".context-menu");
       if (contextMenu && !contextMenu.contains(event.target as Node)) {
         setSelectedText("");
       }
     };
 
-    document.addEventListener('mouseup', handleSelection);
-    document.addEventListener('mousedown', handleClickOutside);
-    
+    document.addEventListener("mouseup", handleSelection);
+    document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
-      document.removeEventListener('mouseup', handleSelection);
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mouseup", handleSelection);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -211,29 +250,29 @@ const DoubtResolver = () => {
   // Existing sendMessage function
   const sendMessage = async () => {
     if (input.trim() === "") return;
-    
+
     const userMessage = input.trim();
     setInput("");
-    
+
     // Add user message to chat
-    setMessages(prev => [...prev, { role: "user", content: userMessage }]);
-    
+    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
+
     // Show typing indicator
     setIsLoading(true);
-    
+
     try {
       // Convert to format expected by Gemini API
       const geminiMessages: GeminiMessage[] = [
-        ...messages.map(msg => ({ role: msg.role, parts: msg.content })),
-        { role: "user", parts: userMessage }
+        ...messages.map((msg) => ({ role: msg.role, parts: msg.content })),
+        { role: "user", parts: userMessage },
       ];
-      
+
       // Get response from Gemini
       const response = await resolveDoubt(userMessage, subject);
-      
+
       if (response) {
         // Add bot response to chat
-        setMessages(prev => [...prev, { role: "model", content: response }]);
+        setMessages((prev) => [...prev, { role: "model", content: response }]);
       }
     } catch (error) {
       console.error("Error getting response:", error);
@@ -267,7 +306,10 @@ const DoubtResolver = () => {
               />
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                  >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {taskDate ? format(taskDate, "PPP") : "Pick a due date"}
                   </Button>
@@ -284,7 +326,9 @@ const DoubtResolver = () => {
             </div>
             <div className="bg-muted rounded-md p-3">
               <div className="text-sm font-medium mb-2">Selected Text</div>
-              <div className="text-sm text-muted-foreground">{selectedText}</div>
+              <div className="text-sm text-muted-foreground">
+                {selectedText}
+              </div>
             </div>
             <Button onClick={saveAsTask}>Save Task</Button>
           </div>
@@ -309,8 +353,10 @@ const DoubtResolver = () => {
                   <SelectValue placeholder="Select subject" />
                 </SelectTrigger>
                 <SelectContent>
-                  {SUBJECTS.map(subject => (
-                    <SelectItem key={subject} value={subject}>{subject}</SelectItem>
+                  {SUBJECTS.map((subject) => (
+                    <SelectItem key={subject} value={subject}>
+                      {subject}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -318,8 +364,8 @@ const DoubtResolver = () => {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <div className="text-sm font-medium">Content</div>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={handleGenerateSummary}
                   disabled={isGeneratingSummary}
@@ -328,7 +374,9 @@ const DoubtResolver = () => {
                 </Button>
               </div>
               <div className="bg-muted rounded-md p-3">
-                <div className="text-sm text-muted-foreground">{selectedText}</div>
+                <div className="text-sm text-muted-foreground">
+                  {selectedText}
+                </div>
               </div>
               {isGeneratingSummary ? (
                 <div className="space-y-2">
@@ -336,15 +384,17 @@ const DoubtResolver = () => {
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-2/3" />
                 </div>
-              ) : noteSummary && (
-                <div className="bg-muted rounded-md p-3">
-                  <div className="text-sm font-medium mb-2">AI Summary</div>
-                  <div className="text-sm text-muted-foreground">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {noteSummary}
-                    </ReactMarkdown>
+              ) : (
+                noteSummary && (
+                  <div className="bg-muted rounded-md p-3">
+                    <div className="text-sm font-medium mb-2">AI Summary</div>
+                    <div className="text-sm text-muted-foreground">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {noteSummary}
+                      </ReactMarkdown>
+                    </div>
                   </div>
-                </div>
+                )
               )}
             </div>
             <Button onClick={saveAsNote}>Save Note</Button>
@@ -354,11 +404,15 @@ const DoubtResolver = () => {
 
       {/* Context Menu */}
       {selectedText && (
-        <div 
+        <div
           className="fixed bg-white/95 backdrop-blur-lg rounded-lg shadow-lg border-2 border-purple-200 p-3 space-y-2 z-50 context-menu"
           style={{
-            top: (window.getSelection()?.getRangeAt(0).getBoundingClientRect().bottom || 0) + 10,
-            left: window.getSelection()?.getRangeAt(0).getBoundingClientRect().left || 0,
+            top:
+              (window.getSelection()?.getRangeAt(0).getBoundingClientRect()
+                .bottom || 0) + 10,
+            left:
+              window.getSelection()?.getRangeAt(0).getBoundingClientRect()
+                .left || 0,
           }}
         >
           <Button
@@ -390,8 +444,12 @@ const DoubtResolver = () => {
 
       <Card className="w-full shadow-lg border-2 border-purple-200 bg-white/80 backdrop-blur-sm">
         <CardHeader className="pb-3">
-          <CardTitle className="text-2xl font-bold gradient-text">Study Assistant</CardTitle>
-          <CardDescription>Ask questions and resolve your study doubts with AI</CardDescription>
+          <CardTitle className="text-2xl font-bold gradient-text">
+            Study Assistant
+          </CardTitle>
+          <CardDescription>
+            Ask questions and resolve your study doubts with AI
+          </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           <div className="flex flex-col h-[500px]">
@@ -410,7 +468,9 @@ const DoubtResolver = () => {
                         msg.role === "user" ? "flex-row-reverse" : ""
                       }`}
                     >
-                      <Avatar className={`h-8 w-8 ${msg.role === "user" ? "bg-study-purple" : "bg-study-blue"}`}>
+                      <Avatar
+                        className={`h-8 w-8 ${msg.role === "user" ? "bg-study-purple" : "bg-study-blue"}`}
+                      >
                         <AvatarFallback>
                           {msg.role === "user" ? (
                             <User className="h-4 w-4" />
@@ -421,8 +481,8 @@ const DoubtResolver = () => {
                       </Avatar>
                       <div
                         className={`rounded-lg p-3 ${
-                          msg.role === "user" 
-                            ? "bg-gradient-to-r from-study-purple to-study-blue text-white" 
+                          msg.role === "user"
+                            ? "bg-gradient-to-r from-study-purple to-study-blue text-white"
                             : "bg-gray-100"
                         }`}
                       >

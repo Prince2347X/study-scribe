@@ -4,7 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // Load environment variables from .env file
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 
 // https://vitejs.dev/config/
@@ -13,18 +13,16 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
-  plugins: [
-    react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
+  plugins: [react(), mode === "development" && componentTagger()].filter(
+    Boolean,
+  ),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
   define: {
-    'process.env': {
+    "process.env": {
       REACT_APP_GEMINI_API_KEY: process.env.REACT_APP_GEMINI_API_KEY,
     },
   },

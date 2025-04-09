@@ -1,4 +1,4 @@
-import { toast } from 'sonner';
+import { toast } from "sonner";
 
 // Replace the hardcoded API key with an environment variable
 const GEMINI_API_KEY = process.env.REACT_APP_GEMINI_API_KEY || "";
@@ -20,7 +20,7 @@ export async function chatWithGemini(messages: GeminiMessage[]) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          contents: messages.map(msg => ({
+          contents: messages.map((msg) => ({
             role: msg.role,
             parts: [{ text: msg.parts }],
           })),
@@ -31,11 +31,11 @@ export async function chatWithGemini(messages: GeminiMessage[]) {
             maxOutputTokens: 8192,
           },
         }),
-      }
+      },
     );
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       console.error("Gemini API error:", data);
       toast.error("Failed to get a response from Gemini");
@@ -62,10 +62,10 @@ export async function generateSummary(text: string) {
       role: "user",
       parts: `Summarize the following study notes concisely, highlighting the key concepts and important points:
 
-${text}`
-    }
+${text}`,
+    },
   ];
-  
+
   return chatWithGemini(messages);
 }
 
@@ -81,10 +81,10 @@ export async function analyzePYQs(questions: string, subject: string) {
 4. Rate difficulty from 1-5
 
 Questions:
-${questions}`
-    }
+${questions}`,
+    },
   ];
-  
+
   return chatWithGemini(messages);
 }
 
@@ -97,10 +97,10 @@ export async function resolveDoubt(doubt: string, context: string) {
 
 ${doubt}
 
-Please explain this concept clearly and thoroughly, with examples if possible.`
-    }
+Please explain this concept clearly and thoroughly, with examples if possible.`,
+    },
   ];
-  
+
   return chatWithGemini(messages);
 }
 
@@ -109,26 +109,28 @@ export async function generateNotes(subject: string, title: string) {
   const messages: GeminiMessage[] = [
     {
       role: "user",
-      parts: `Generate concise, point-wise study notes about "${title}" for ${subject} subject. Focus on key concepts and important points. Keep it clear and not too verbose.`
-    }
+      parts: `Generate concise, point-wise study notes about "${title}" for ${subject} subject. Focus on key concepts and important points. Keep it clear and not too verbose.`,
+    },
   ];
-  
+
   return chatWithGemini(messages);
 }
 
 // Function to generate study tasks from notes
-export async function generateStudyTasks(notes: { title: string; subject: string }[]) {
+export async function generateStudyTasks(
+  notes: { title: string; subject: string }[],
+) {
   const messages: GeminiMessage[] = [
     {
       role: "user",
       parts: `Create one focused study task for each note. Return ONLY the task titles, one per line, with NO additional text, markdown, or formatting.
 Notes:
-${notes.map(note => `- ${note.title} (${note.subject})`).join('\n')}
+${notes.map((note) => `- ${note.title} (${note.subject})`).join("\n")}
 
 Return each task in this exact format (and nothing else):
-Study {note title}`
-    }
+Study {note title}`,
+    },
   ];
-  
+
   return chatWithGemini(messages);
 }
