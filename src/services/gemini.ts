@@ -103,3 +103,15 @@ Please explain this concept clearly and thoroughly, with examples if possible.`
   
   return chatWithGemini(messages);
 }
+
+// Function to generate notes
+export async function generateNotes(subject: string, title: string) {
+  const messages: GeminiMessage[] = [
+    {
+      role: "user",
+      parts: `Generate concise, point-wise study notes about "${title}" for ${subject} subject. Focus on key concepts and important points. Keep it clear and not too verbose.`
+    }
+  ];
+  
+  return chatWithGemini(messages);
+}

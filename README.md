@@ -20,7 +20,7 @@
 
 ### 2. Smart Notes
 - Subject-wise note organization
-- AI-powered note summarization using Google Gemini
+- AI-powered note generation and summarization using Google Gemini
 - Rich text editing capabilities
 - Automatic saving and syncing
 

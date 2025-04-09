@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { BookText, FilePlus, Save, Trash2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { generateSummary } from '../services/gemini';
+import { generateSummary, generateNotes } from '../services/gemini';
 import { Skeleton } from '@/components/ui/skeleton';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -55,6 +55,8 @@ const NoteEditor = () => {
   const [noteSubject, setNoteSubject] = useState(SUBJECTS[0]);
   const [summary, setSummary] = useState("");
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const [isGeneratingNote, setIsGeneratingNote] = useState(false);
+  const [activeTab, setActiveTab] = useState("editor");
 
   useEffect(() => {
     // Convert Date objects to ISO strings for storage
@@ -157,6 +159,7 @@ const NoteEditor = () => {
           setNotes([...notes, newNote]);
           setActiveNote(newNote);
         }
+        setActiveTab("summary");
         toast.success("Summary generated and saved successfully");
       }
     } catch (error) {
@@ -165,6 +168,33 @@ const NoteEditor = () => {
     } finally {
       setIsGeneratingSummary(false);
     }
+  };
+
+  const handleGenerateNote = async () => {
+    if (noteTitle.trim() === "") {
+      toast.error("Please provide a title for the note");
+      return;
+    }
+    
+    setIsGeneratingNote(true);
+    setNoteContent("");
+    
+    try {
+      const result = await generateNotes(noteSubject, noteTitle);
+      if (result) {
+        setNoteContent(result);
+        toast.success("Notes generated successfully");
+      }
+    } catch (error) {
+      toast.error("Failed to generate notes");
+      console.error(error);
+    } finally {
+      setIsGeneratingNote(false);
+    }
+  };
+
+  const handlePreviewClick = () => {
+    setActiveTab("preview");
   };
 
   return (
@@ -224,10 +254,11 @@ const NoteEditor = () => {
 
           {/* Note Editor */}
           <div className="md:col-span-2 flex flex-col">
-            <Tabs defaultValue="editor" className="flex flex-col flex-1">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1">
               <div className="px-4 pt-2 border-b">
                 <TabsList className="w-full justify-start">
                   <TabsTrigger value="editor">Editor</TabsTrigger>
+                  <TabsTrigger value="preview">Preview</TabsTrigger>
                   <TabsTrigger value="summary">AI Summary</TabsTrigger>
                 </TabsList>
               </div>
@@ -252,27 +283,73 @@ const NoteEditor = () => {
                   </Select>
                 </div>
                 
-                <Textarea
-                  placeholder="Start writing your notes here..."
-                  value={noteContent}
-                  onChange={(e) => setNoteContent(e.target.value)}
-                  className="flex-1 resize-none min-h-[300px]"
-                />
+                {isGeneratingNote ? (
+                  <div className="flex-1 space-y-3">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </div>
+                ) : (
+                  <Textarea
+                    placeholder="Start writing your notes here... (Markdown supported)"
+                    value={noteContent}
+                    onChange={(e) => setNoteContent(e.target.value)}
+                    className="flex-1 resize-none min-h-[300px] font-mono"
+                  />
+                )}
                 
                 <div className="flex justify-between mt-3">
-                  <Button 
-                    variant="outline" 
-                    className="flex gap-1"
-                    onClick={handleGenerateSummary}
-                    disabled={noteContent.trim().length < 50 || isGeneratingSummary}
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    Generate Summary
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      className="flex gap-1"
+                      onClick={handleGenerateNote}
+                      disabled={noteTitle.trim() === "" || isGeneratingNote}
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      {isGeneratingNote ? "Generating..." : "Generate Note"}
+                    </Button>
+                  </div>
+                  <Button onClick={handlePreviewClick} className="gradient-bg">
+                    Preview
                   </Button>
-                  <Button onClick={saveNote} className="gradient-bg">
-                    <Save className="h-4 w-4 mr-1" />
-                    Save Note
-                  </Button>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="preview" className="flex-1 px-4">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="font-medium text-sm">Title</div>
+                    <div className="p-2 border rounded-md bg-muted">{noteTitle}</div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="font-medium text-sm">Subject</div>
+                    <div className="p-2 border rounded-md bg-muted">{noteSubject}</div>
+                  </div>
+                  <ScrollArea className="h-[220px] border rounded-md p-4">
+                    <div className="prose prose-sm max-w-none">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {noteContent || "_No content to preview_"}
+                      </ReactMarkdown>
+                    </div>
+                  </ScrollArea>
+                  <div className="flex justify-between mt-3">
+                    <Button 
+                      variant="outline" 
+                      className="flex gap-1"
+                      onClick={handleGenerateSummary}
+                      disabled={noteContent.trim().length < 50 || isGeneratingSummary}
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      {isGeneratingSummary ? "Generating..." : "Generate Summary"}
+                    </Button>
+                    <Button onClick={saveNote} className="gradient-bg">
+                      <Save className="h-4 w-4 mr-1" />
+                      Save Note
+                    </Button>
+                  </div>
                 </div>
               </TabsContent>
 
@@ -286,18 +363,26 @@ const NoteEditor = () => {
                     <Skeleton className="h-4 w-2/3" />
                   </div>
                 ) : summary ? (
-                    <ScrollArea className="h-[350px]">
+                  <ScrollArea className="h-[350px]">
                     <div className="prose prose-sm max-w-none">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {summary}
+                        {summary}
                       </ReactMarkdown>
                     </div>
-                    </ScrollArea>
+                  </ScrollArea>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
                     <BookText className="h-12 w-12 mb-2 opacity-30" />
-                    <p>Generate a summary of your notes using AI</p>
-                    <p className="text-sm">Write your notes in the editor tab and click the "Generate Summary" button</p>
+                    <p>No summary generated yet</p>
+                    <Button 
+                      variant="outline" 
+                      className="mt-4 flex gap-1"
+                      onClick={handleGenerateSummary}
+                      disabled={noteContent.trim().length < 50 || isGeneratingSummary}
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      Generate AI Summary
+                    </Button>
                   </div>
                 )}
               </TabsContent>
