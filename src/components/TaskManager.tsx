@@ -7,14 +7,24 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { Calendar as CalendarIcon, Plus, Trash2 } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Trash2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { generateStudyTasks } from '@/services/gemini';
 
 type Task = {
   id: string;
   title: string;
   completed: boolean;
   dueDate: Date | undefined;
+};
+
+type Note = {
+  id: string;
+  title: string;
+  subject: string;
+  content: string;
+  summary?: string;
+  createdAt: Date;
 };
 
 const TaskManager = () => {
@@ -30,8 +40,20 @@ const TaskManager = () => {
     }
     return [];
   });
+  const [notes, setNotes] = useState<Note[]>(() => {
+    const savedNotes = localStorage.getItem("study-notes");
+    if (savedNotes) {
+      const parsedNotes = JSON.parse(savedNotes);
+      return parsedNotes.map((note: any) => ({
+        ...note,
+        createdAt: new Date(note.createdAt)
+      }));
+    }
+    return [];
+  });
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [isGeneratingTasks, setIsGeneratingTasks] = useState(false);
 
   useEffect(() => {
     // Convert Date objects to ISO strings for storage
@@ -74,6 +96,37 @@ const TaskManager = () => {
     toast.info("Task removed");
   };
 
+  const generateStudyPlan = async () => {
+    if (notes.length === 0) {
+      toast.error("No notes available to generate study plan");
+      return;
+    }
+
+    setIsGeneratingTasks(true);
+    try {
+      const result = await generateStudyTasks(notes);
+      if (result) {
+        // Split by newlines and create one task per line, filtering out any empty lines
+        const generatedTasks = result.split('\n')
+          .filter(line => line.trim())
+          .map(taskTitle => ({
+            id: crypto.randomUUID(),
+            title: taskTitle.trim(),
+            completed: false,
+            dueDate: undefined,
+          }));
+
+        setTasks(prevTasks => [...prevTasks, ...generatedTasks]);
+        toast.success(`Generated ${generatedTasks.length} study tasks`);
+      }
+    } catch (error) {
+      console.error("Error generating study plan:", error);
+      toast.error("Failed to generate study plan");
+    } finally {
+      setIsGeneratingTasks(false);
+    }
+  };
+
   // Group tasks by completion status
   const pendingTasks = tasks.filter((task) => !task.completed);
   const completedTasks = tasks.filter((task) => task.completed);
@@ -81,8 +134,20 @@ const TaskManager = () => {
   return (
     <Card className="w-full shadow-lg border-2 border-violet-200 bg-white/80 backdrop-blur-sm">
       <CardHeader className="pb-3">
-        <CardTitle className="text-2xl font-bold gradient-text">Study Planner</CardTitle>
-        <CardDescription>Keep track of your study tasks and deadlines</CardDescription>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle className="text-2xl font-bold gradient-text">Smart Study Planner</CardTitle>
+            <CardDescription>Keep track of your study tasks and deadlines</CardDescription>
+          </div>
+          <Button 
+            onClick={generateStudyPlan} 
+            className="gradient-bg" 
+            disabled={isGeneratingTasks || notes.length === 0}
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            {isGeneratingTasks ? "Planning..." : "Plan your study"}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="flex gap-2 mb-4">

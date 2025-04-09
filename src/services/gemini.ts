@@ -115,3 +115,20 @@ export async function generateNotes(subject: string, title: string) {
   
   return chatWithGemini(messages);
 }
+
+// Function to generate study tasks from notes
+export async function generateStudyTasks(notes: { title: string; subject: string }[]) {
+  const messages: GeminiMessage[] = [
+    {
+      role: "user",
+      parts: `Create one focused study task for each note. Return ONLY the task titles, one per line, with NO additional text, markdown, or formatting.
+Notes:
+${notes.map(note => `- ${note.title} (${note.subject})`).join('\n')}
+
+Return each task in this exact format (and nothing else):
+Study {note title}`
+    }
+  ];
+  
+  return chatWithGemini(messages);
+}
