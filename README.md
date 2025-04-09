@@ -1,7 +1,7 @@
 # StudyScribe - AI-Powered Study Companion
 
-[![Deployment](https://img.shields.io/badge/deployment-vercel-black?style=flat-square&logo=vercel)](https://study-scribe-gemini-glow.vercel.app/)
-[![Version](https://img.shields.io/badge/version-1.0.0-blue?style=flat-square)](package.json)
+[![Deployment](https://img.shields.io/badge/deployment-vercel-black?style=flat-square&logo=vercel)](https://study-scribe.vercel.app/)
+[![Version](https://img.shields.io/badge/version-1.5.0-blue?style=flat-square)](package.json)
 [![React](https://img.shields.io/badge/react-18.3.1-61DAFB?style=flat-square&logo=react)](package.json)
 [![TypeScript](https://img.shields.io/badge/typescript-5.5.3-3178C6?style=flat-square&logo=typescript)](package.json)
 [![Tailwind CSS](https://img.shields.io/badge/tailwindcss-3.4.11-38B2AC?style=flat-square&logo=tailwind-css)](package.json)
