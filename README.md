@@ -1,4 +1,4 @@
-# StudyScribe - AI-Powered Study Companion
+# [StudyScribe - AI-Powered Study Companion](https://study-scribe.vercel.app)
 
 [![Deployment](https://img.shields.io/badge/deployment-vercel-black?style=flat-square&logo=vercel)](https://study-scribe.vercel.app/)
 [![Version](https://img.shields.io/badge/version-1.5.0-blue?style=flat-square)](package.json)
